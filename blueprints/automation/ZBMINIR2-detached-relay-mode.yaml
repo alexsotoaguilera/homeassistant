@@ -2,7 +2,7 @@ blueprint:
   name: Configure ZBMINIR2 detached relay mode
   description: Configure ZBMINIR2 to toggle light without turn off the switch.
   domain: automation
-  author: alex.soto.aguilera@gmail.com
+  author: Alex Soto Aguilera
   homeassistant:
     min_version: 2022.4.0
 
@@ -24,7 +24,7 @@ blueprint:
         entity:
           filter:
             domain: light
-          multiple: false
+          multiple: true
 
 triggers:
   - domain: mqtt
