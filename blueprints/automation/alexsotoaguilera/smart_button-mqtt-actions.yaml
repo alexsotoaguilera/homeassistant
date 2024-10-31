@@ -1,0 +1,67 @@
+blueprint:
+  name: Configure Smart Button MQTT triggers and actions
+  description: Configure MQTT triggers and actions for Smart Button with SINGLE, DOUBLE and HOLD tap actions.
+  domain: automation
+  author: Alex Soto Aguilera
+  homeassistant:
+    min_version: 2022.4.0
+
+  input:
+    smart_button_device:
+      name: Smart Button device
+      description: Smart Button device, ensure to your device supports the actions (SINGLE, DOUBLE and HOLD).
+      selector:
+        device:
+          multiple: false
+    actions_single:
+      name: Single Tap Actions
+      description: Select actions to activate with SINGLE tap.
+      selector:
+        action: {}
+    actions_double:
+      name: Double Tap Actions
+      description: Select actions to activate with Double tap.
+      selector:
+        action: {}
+    actions_hold:
+      name: Hold Tap Actions
+      description: Select actions to activate with Hold tap.
+      selector:
+        action: {}
+
+triggers:
+  - trigger: device
+    domain: mqtt
+    id: single
+    device_id: !input 'smart_button_device'
+    type: action
+    subtype: single
+  - trigger: device
+    domain: mqtt
+    id: double
+    device_id: !input 'smart_button_device'
+    type: action
+    subtype: double
+  - trigger: device
+    domain: mqtt
+    id: hold
+    device_id: !input 'smart_button_device'
+    type: action
+    subtype: hold
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: single
+        sequence: !input 'actions_single'
+      - conditions:
+          - condition: trigger
+            id: double
+        sequence: !input 'actions_double'
+      - conditions:
+          - condition: trigger
+            id: hold
+        sequence: !input 'actions_hold'
+
+mode: single
