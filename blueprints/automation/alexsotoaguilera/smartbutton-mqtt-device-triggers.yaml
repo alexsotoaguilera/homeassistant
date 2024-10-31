@@ -1,15 +1,16 @@
 blueprint:
-  name: Configure Smart Button MQTT triggers and actions
-  description: Configure MQTT triggers and actions for Smart Button with SINGLE, DOUBLE and HOLD tap actions.
+  name: Smart Button with MQTT device triggers
+  description: Configure Smart Button with MQTT device triggers with SINGLE, DOUBLE and HOLD tap actions.
   domain: automation
   author: Alex Soto Aguilera
+  source_url: https://gist.github.com/alexsotoaguilera/e242ab8573148f0650a98f90e56366ab
   homeassistant:
     min_version: 2022.4.0
 
   input:
     smart_button_device:
       name: Smart Button device
-      description: Smart Button device, ensure to your device supports the actions (SINGLE, DOUBLE and HOLD).
+      description: Smart Button device, ensure to your device supports MQTT device triggers with SINGLE, DOUBLE and HOLD tap actions.
       selector:
         device:
           multiple: false
