@@ -1,0 +1,83 @@
+blueprint:
+  name: Alternative Plant problem notification
+  description: |
+    For each configured plant, checks its status and notifies if there are any problems.
+    This blueprint works in conjunction with "Alternative plants component for Home Assistant".
+     * https://github.com/Olen/homeassistant-plant
+
+  domain: automation
+  author: Alex Soto Aguilera
+  source_url: https://test.com/asfd
+  homeassistant:
+    min_version: 2022.4.0
+
+  input:
+    notification_time:
+      name: Time to check all plant sensors
+      description: The verification of the plant sensors takes place within the configured time.
+      default: '10:00:00'
+      selector:
+        time: {}
+    exclude:
+      name: Excluded plants
+      description: Plants to exclude from report.
+      default:
+        entity_id: []
+      selector:
+        target:
+          entity:
+          - device_class:
+            - plant
+    devices_to_notify:
+      name: Devices to notify
+      description: Select the devices with HomeAssistant mobile app to receive notifications.
+      default: []
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+          multiple: true
+
+variables:
+  exclude_plant_entities: !input exclude
+  notify_plant_entities: |
+    {% set plant_entities = states.plant | map(attribute='entity_id') | select('is_state', 'problem') | list %}
+    {% set data = namespace(notify_entities=[]) %}
+    {% for plant_entity in plant_entities %}
+      {% if plant_entity not in exclude_plant_entities %}
+         {% set data.notify_entities = data.notify_entities + [plant_entity] %}
+      {% endif %}
+    {% endfor %}
+    {{ data.notify_entities }}
+  notification_title: |
+    {% if notify_plant_entities|length > 0 -%}
+      Plant Report: problem detected.
+    {% else -%}
+      Plant Report: all your plants are fine.
+    {% endif -%}
+
+  notification_body: |
+    {% for plant_entity in notify_plant_entities %}
+      {{ state_attr(plant_entity, 'friendly_name') }}:
+      {% set plant_sensors = device_entities(device_id(plant_entity)) | select('is_state_attr', 'state_class', 'measurement') | list -%}
+      {% for sensor in plant_sensors -%}
+        {% if not is_state(sensor, 'unknown') -%}
+          - {{ state_attr(sensor, 'device_class') }} {{ states(sensor) }}{{ state_attr(sensor, 'unit_of_measurement') }}
+        {% endif -%}
+      {% endfor -%}
+    {% endfor -%}
+
+trigger:
+- platform: time
+  at: !input 'notification_time'
+
+action:
+  repeat:
+    for_each: !input 'devices_to_notify'
+    sequence:
+      - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') | slugify }}"
+        data:
+          title: '{{ notification_title }}'
+          message: '{{ notification_body }}'
+
+mode: single
