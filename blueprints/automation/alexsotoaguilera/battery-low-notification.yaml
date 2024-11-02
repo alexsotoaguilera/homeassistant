@@ -1,0 +1,101 @@
+blueprint:
+  name: Battery low notification
+  description: For each device with battery sensor, checks its status and notifies if there are below the defined limits.
+  domain: automation
+  author: Alex Soto Aguilera
+  source_url: https://gist.github.com/alexsotoaguilera/
+  homeassistant:
+    min_version: 2022.4.0
+
+  input:
+    threshold:
+      name: Battery warning level threshold
+      description: Battery sensors below threshold are assumed to be low-battery (as
+        well as binary battery sensors with value 'on').
+      default: 20
+      selector:
+        number:
+          min: 5.0
+          max: 100.0
+          unit_of_measurement: '%'
+          mode: slider
+          step: 5.0
+    time:
+      name: Time to test on
+      description: Test is run at configured time
+      default: '10:00:00'
+      selector:
+        time: {}
+    day:
+      name: Weekday to test on
+      description: 'Test is run at configured time either everyday (0) or on a given
+        weekday (1: Monday ... 7: Sunday)'
+      default: 0
+      selector:
+        number:
+          min: 0.0
+          max: 7.0
+          mode: slider
+          step: 1.0
+    exclude:
+      name: Excluded Sensors
+      description: Battery sensors (e.g. smartphone) to exclude from detection. Only
+        entities are supported, devices must be expanded!
+      default:
+        entity_id: []
+      selector:
+        target:
+          entity:
+          - device_class:
+            - battery
+    devices_to_notify:
+      name: Devices to notify
+      description: Device needs to run the official Home Assistant app to receive notifications.
+      default: []
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+          multiple: true
+
+variables:
+  day: !input day
+  threshold: !input threshold
+  exclude: !input exclude
+  notify_battery_entities: |
+    {% set battery_entities = states.sensor | map(attribute='entity_id') | select('is_state_attr', 'device_class', 'battery') | list %}
+    {% set data = namespace(notify_entities=[]) %}
+    {% for battery_entity in battery_entities %}
+        {% if battery_entity not in exclude and int(states(battery_entity)) < int(threshold) %}
+         {% set data.notify_entities = data.notify_entities + [battery_entity] %}
+      {% endif %}
+    {% endfor %}
+    {{ data.notify_entities }}
+  notification_title: |
+    {% if notify_battery_entities|length > 0 -%}
+      Battery level: some battery sensors are below the defined limit.
+    {% else -%}
+      Battery level: all battery sensors are above the defined limit.
+    {% endif -%}
+  notification_body: |
+    {% for battery_entity in notify_battery_entities -%}
+      - {{ state_attr(battery_entity, 'friendly_name') }}: {{ states(battery_entity) }}{{ state_attr(battery_entity, 'unit_of_measurement') }}
+    {% endfor -%}
+
+trigger:
+- platform: time
+  at: !input time
+
+condition:
+- '{{ (day|int == 0 or day|int == now().isoweekday()) }}'
+
+action:
+  repeat:
+    for_each: !input 'devices_to_notify'
+    sequence:
+      - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') | slugify }}"
+        data:
+          title: '{{ notification_title }}'
+          message: '{{ notification_body }}'
+
+mode: single
