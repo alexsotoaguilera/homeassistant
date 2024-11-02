@@ -3,7 +3,7 @@ blueprint:
   description: For each device with battery sensor, checks its status and notifies if there are below the defined limits.
   domain: automation
   author: Alex Soto Aguilera
-  source_url: https://gist.github.com/alexsotoaguilera/
+  source_url: https://gist.github.com/alexsotoaguilera/93752798bef04eb4c4e44cba3dfad33d
   homeassistant:
     min_version: 2022.4.0
 
