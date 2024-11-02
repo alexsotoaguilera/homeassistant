@@ -4,10 +4,9 @@ blueprint:
     For each configured plant, checks its status and notifies if there are any problems.
     This blueprint works in conjunction with "Alternative plants component for Home Assistant".
      * https://github.com/Olen/homeassistant-plant
-
   domain: automation
   author: Alex Soto Aguilera
-  source_url: https://test.com/asfd
+  source_url: https://gist.github.com/alexsotoaguilera/462e40dcbc40a0fa0dd460755ef3defa
   homeassistant:
     min_version: 2022.4.0
 
