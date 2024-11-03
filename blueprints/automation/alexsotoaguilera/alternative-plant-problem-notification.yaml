@@ -29,7 +29,7 @@ blueprint:
             - plant
     devices_to_notify:
       name: Devices to notify
-      description: Select the devices with HomeAssistant mobile app to receive notifications.
+      description: Device needs to run the official Home Assistant app to receive notifications.
       default: []
       selector:
         device:
