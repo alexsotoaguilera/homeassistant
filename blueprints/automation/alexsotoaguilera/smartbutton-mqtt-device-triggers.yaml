@@ -66,4 +66,3 @@ action:
         sequence: !input 'actions_hold'
 
 mode: single
-max_exceeded: silent
