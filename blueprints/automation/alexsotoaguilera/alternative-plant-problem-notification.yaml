@@ -48,35 +48,28 @@ variables:
       {% endif %}
     {% endfor %}
     {{ data.notify_entities }}
-  notification_title: |
-    {% if notify_plant_entities|length > 0 -%}
-      Plant Report: problem detected.
-    {% else -%}
-      Plant Report: all your plants are fine.
-    {% endif -%}
-
-  notification_body: |
-    {% for plant_entity in notify_plant_entities %}
-      {{ state_attr(plant_entity, 'friendly_name') }}:
-      {% set plant_sensors = device_entities(device_id(plant_entity)) | select('is_state_attr', 'state_class', 'measurement') | list -%}
-      {% for sensor in plant_sensors -%}
-        {% if not is_state(sensor, 'unknown') -%}
-          - {{ state_attr(sensor, 'device_class') }} {{ states(sensor) }}{{ state_attr(sensor, 'unit_of_measurement') }}
-        {% endif -%}
-      {% endfor -%}
-    {% endfor -%}
 
 trigger:
 - platform: time
   at: !input 'notification_time'
 
 action:
-  repeat:
-    for_each: !input 'devices_to_notify'
-    sequence:
-      - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') | slugify }}"
-        data:
-          title: '{{ notification_title }}'
-          message: '{{ notification_body }}'
-
+  - repeat:
+      for_each: !input 'devices_to_notify'
+      sequence:
+        - variables:
+            device_to_notify: "{{ repeat.item }}"
+        - repeat:
+            for_each: "{{ notify_plant_entities }}"
+            sequence:
+              - service: "notify.mobile_app_{{ device_attr(device_to_notify, 'name') | slugify }}"
+                data:
+                  title: "Plant WARNING: {{ state_attr(repeat.item, 'friendly_name') }}."
+                  message: |
+                      {% set plant_sensors = device_entities(device_id(repeat.item)) | select('is_state_attr', 'state_class', 'measurement') | list -%}
+                      {% for sensor in plant_sensors -%}
+                        {% if not is_state(sensor, 'unknown') -%}
+                          - {{ state_attr(sensor, 'device_class') }} {{ states(sensor) }}{{ state_attr(sensor, 'unit_of_measurement') }}
+                        {% endif -%}
+                      {% endfor -%}
 mode: single
