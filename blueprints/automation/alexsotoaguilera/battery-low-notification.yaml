@@ -3,33 +3,35 @@ blueprint:
   description: For each device with battery sensor, checks its status and notifies if there are below the defined limits.
   domain: automation
   author: Alex Soto Aguilera
-  source_url: https://gist.github.com/alexsotoaguilera/93752798bef04eb4c4e44cba3dfad33d
+  source_url: https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/battery-low-notification.yaml
   homeassistant:
     min_version: 2022.4.0
 
   input:
     threshold:
       name: Battery warning level threshold
-      description: Battery sensors below threshold are assumed to be low-battery (as
+      description:
+        Battery sensors below threshold are assumed to be low-battery (as
         well as binary battery sensors with value 'on').
       default: 20
       selector:
         number:
           min: 5.0
           max: 100.0
-          unit_of_measurement: '%'
+          unit_of_measurement: "%"
           mode: slider
           step: 5.0
     time:
       name: Time to test on
       description: Test is run at configured time
-      default: '10:00:00'
+      default: "10:00:00"
       selector:
         time: {}
     day:
       name: Weekday to test on
-      description: 'Test is run at configured time either everyday (0) or on a given
-        weekday (1: Monday ... 7: Sunday)'
+      description:
+        "Test is run at configured time either everyday (0) or on a given
+        weekday (1: Monday ... 7: Sunday)"
       default: 0
       selector:
         number:
@@ -39,15 +41,16 @@ blueprint:
           step: 1.0
     exclude:
       name: Excluded Sensors
-      description: Battery sensors (e.g. smartphone) to exclude from detection. Only
+      description:
+        Battery sensors (e.g. smartphone) to exclude from detection. Only
         entities are supported, devices must be expanded!
       default:
         entity_id: []
       selector:
         target:
           entity:
-          - device_class:
-            - battery
+            - device_class:
+                - battery
     devices_to_notify:
       name: Devices to notify
       description: Device needs to run the official Home Assistant app to receive notifications.
@@ -83,19 +86,19 @@ variables:
     {% endfor -%}
 
 trigger:
-- platform: time
-  at: !input time
+  - platform: time
+    at: !input time
 
 condition:
-- '{{ (day|int == 0 or day|int == now().isoweekday()) }}'
+  - "{{ (day|int == 0 or day|int == now().isoweekday()) }}"
 
 action:
   repeat:
-    for_each: !input 'devices_to_notify'
+    for_each: !input "devices_to_notify"
     sequence:
       - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') | slugify }}"
         data:
-          title: '{{ notification_title }}'
-          message: '{{ notification_body }}'
+          title: "{{ notification_title }}"
+          message: "{{ notification_body }}"
 
 mode: single

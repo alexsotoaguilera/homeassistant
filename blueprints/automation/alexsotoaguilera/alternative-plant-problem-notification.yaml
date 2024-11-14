@@ -6,7 +6,7 @@ blueprint:
      * https://github.com/Olen/homeassistant-plant
   domain: automation
   author: Alex Soto Aguilera
-  source_url: https://gist.github.com/alexsotoaguilera/462e40dcbc40a0fa0dd460755ef3defa
+  source_url: https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/alternative-plant-problem-notification.yaml
   homeassistant:
     min_version: 2022.4.0
 
@@ -14,7 +14,7 @@ blueprint:
     notification_time:
       name: Time to check all plant sensors
       description: The verification of the plant sensors takes place within the configured time.
-      default: '10:00:00'
+      default: "10:00:00"
       selector:
         time: {}
     exclude:
@@ -25,8 +25,8 @@ blueprint:
       selector:
         target:
           entity:
-          - device_class:
-            - plant
+            - device_class:
+                - plant
     devices_to_notify:
       name: Devices to notify
       description: Device needs to run the official Home Assistant app to receive notifications.
@@ -50,12 +50,12 @@ variables:
     {{ data.notify_entities }}
 
 trigger:
-- platform: time
-  at: !input 'notification_time'
+  - platform: time
+    at: !input "notification_time"
 
 action:
   - repeat:
-      for_each: !input 'devices_to_notify'
+      for_each: !input "devices_to_notify"
       sequence:
         - variables:
             device_to_notify: "{{ repeat.item }}"
@@ -66,10 +66,10 @@ action:
                 data:
                   title: "Plant WARNING: {{ state_attr(repeat.item, 'friendly_name') }}."
                   message: |
-                      {% set plant_sensors = device_entities(device_id(repeat.item)) | select('is_state_attr', 'state_class', 'measurement') | list -%}
-                      {% for sensor in plant_sensors -%}
-                        {% if not is_state(sensor, 'unknown') -%}
-                          - {{ state_attr(sensor, 'device_class') }} {{ states(sensor) }}{{ state_attr(sensor, 'unit_of_measurement') }}
-                        {% endif -%}
-                      {% endfor -%}
+                    {% set plant_sensors = device_entities(device_id(repeat.item)) | select('is_state_attr', 'state_class', 'measurement') | list -%}
+                    {% for sensor in plant_sensors -%}
+                      {% if not is_state(sensor, 'unknown') -%}
+                        - {{ state_attr(sensor, 'device_class') }} {{ states(sensor) }}{{ state_attr(sensor, 'unit_of_measurement') }}
+                      {% endif -%}
+                    {% endfor -%}
 mode: single

@@ -3,7 +3,7 @@ blueprint:
   description: Configure Smart Button with MQTT device triggers with SINGLE, DOUBLE and HOLD tap actions.
   domain: automation
   author: Alex Soto Aguilera
-  source_url: https://gist.github.com/alexsotoaguilera/e242ab8573148f0650a98f90e56366ab
+  source_url: https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/smartbutton-mqtt-device-triggers.yaml
   homeassistant:
     min_version: 2022.4.0
 
@@ -34,19 +34,19 @@ triggers:
   - trigger: device
     domain: mqtt
     id: single
-    device_id: !input 'smart_button_device'
+    device_id: !input "smart_button_device"
     type: action
     subtype: single
   - trigger: device
     domain: mqtt
     id: double
-    device_id: !input 'smart_button_device'
+    device_id: !input "smart_button_device"
     type: action
     subtype: double
   - trigger: device
     domain: mqtt
     id: hold
-    device_id: !input 'smart_button_device'
+    device_id: !input "smart_button_device"
     type: action
     subtype: hold
 
@@ -55,15 +55,15 @@ action:
       - conditions:
           - condition: trigger
             id: single
-        sequence: !input 'actions_single'
+        sequence: !input "actions_single"
       - conditions:
           - condition: trigger
             id: double
-        sequence: !input 'actions_double'
+        sequence: !input "actions_double"
       - conditions:
           - condition: trigger
             id: hold
-        sequence: !input 'actions_hold'
+        sequence: !input "actions_hold"
 
 mode: single
 max_exceeded: silent
