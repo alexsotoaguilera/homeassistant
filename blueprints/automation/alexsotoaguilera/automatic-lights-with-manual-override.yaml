@@ -1,0 +1,345 @@
+blueprint:
+  name: Automatic lights with manual override
+  description: Automatic lights with manual override
+  domain: automation
+  source_url: https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/automatic-lights-with-manual-override.yaml
+  author: Alex Soto Aguilera
+  homeassistant:
+    min_version: 2022.4.0
+
+  input:
+    trigger:
+      name: "Trigger *"
+      icon: mdi:cog-outline
+      collapsed: false
+      input:
+        trigger_on_sensor:
+          name: Trigger ON Sensor - Binary Sensors *
+          description:
+            The trigger sensor is responsible for turning the lights and switches ON. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
+            For use multiple trigger sensors group them together using a group helper.
+          default: []
+          selector:
+            entity:
+              filter:
+                domain:
+                  - binary_sensor
+              multiple: false
+        trigger_off_sensor:
+          name: Trigger OFF Sensor - Binary Sensors *
+          description:
+            The trigger sensor is responsible for turning the lights and switchesOFF. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
+            For use multiple trigger sensors group them together using a group helper.
+          default: []
+          selector:
+            entity:
+              filter:
+                domain:
+                  - binary_sensor
+              multiple: false
+    lights_settings:
+      name: "Lights *"
+      icon: mdi:lightbulb-outline
+      collapsed: false
+      input:
+        lights:
+          name: Lights *
+          description: The lights that will be activated by the trigger sensor/s.
+          default: []
+          selector:
+            entity:
+              filter:
+                domain:
+                  - light
+              multiple: false
+
+    bypass_settings:
+      name: "Bypass *"
+      icon: mdi:cog-pause-outline
+      collapsed: false
+      input:
+        bypass:
+          name: Bypass Input Boolean Helper
+          description:
+            Allows the lights to be operated manually, deactivates the trigger sensor for the defined time when you manually operate the light.
+            Select the input boolean helper to use to deactivate the trigger sensor. Create one specifically for this automation.
+          default: []
+          selector:
+            entity:
+              domain:
+                - input_boolean
+              multiple: false
+
+        bypass_auto_off_delay:
+          name: Bypass Auto OFF - Time Delay
+          description: Set the bypass auto OFF time delay. The time delay starts from the last bypass that was turned ON.
+          default: 60
+          selector:
+            number:
+              min: 1
+              max: 240
+              step: 1
+              unit_of_measurement: minutes
+
+    sun_settings:
+      name: "Sun Elevation"
+      icon: mdi:weather-sunny
+      collapsed: true
+      input:
+        include_sun:
+          name: Use The Sun Option (Optional)
+          description:
+            This option is used to add a condition that only allows the automation to run when it is dark or below the 'Sun Elevation' settings.
+            It's a global condition that can work alongside other options.
+          default: sun_disabled
+          selector:
+            select:
+              options:
+                - label: Enable the sun option
+                  value: "sun_enabled"
+                - label: Disable the sun option
+                  value: "sun_disabled"
+        sun_elevation:
+          name: Sun Elevation Falling
+          description:
+            The sun elevation falling refers to the angle between the sun and the horizon when the sun is setting.
+            A negative value indicates that the sun is BELOW the horizon. For example, a setting guide of -1.5 corresponds to dusk
+          default: -1.5
+          selector:
+            number:
+              min: -10
+              max: 5
+              step: 0.5
+              unit_of_measurement: degrees
+        sun_elevation_rising:
+          name: Sun Elevation Rising
+          description:
+            The sun elevation rising refers to the angle between the sun and the horizon during sunrise.
+            A negative value indicates that the sun is BELOW the horizon. For example, a setting guide of -4.0 corresponds to dawn.
+          default: -4.0
+          selector:
+            number:
+              min: -10
+              max: 5
+              step: 0.5
+              unit_of_measurement: degrees
+
+    time_settings:
+      name: "Time"
+      icon: mdi:clock-outline
+      collapsed: true
+      input:
+        include_time:
+          name: Use The Time Options (Optional)
+          description:
+            This option is used to add a condition that only allows the automation to run between the start time and end time settings on the selected weekdays.
+            These time settings are global conditions that can work alongside other options.
+          default: time_disabled
+          selector:
+            select:
+              options:
+                - label: Enable the time options
+                  value: "time_enabled"
+                - label: Disable the time options
+                  value: "time_disabled"
+        after_time:
+          name: Start Time
+          description: Set the start time.
+          default: 00:00:00
+          selector:
+            time:
+        before_time:
+          name: End Time
+          description: Set the end time.
+          default: 00:00:00
+          selector:
+            time:
+        weekday_options:
+          name: Weekdays
+          description:
+            Select the days of the week you would like the automation to run.
+            You must select "Enable the time options" above for the weekday selections to work.
+          default:
+            - mon
+            - tue
+            - wed
+            - thu
+            - fri
+            - sat
+            - sun
+          selector:
+            select:
+              multiple: true
+              mode: list
+              options:
+                - label: Monday
+                  value: "mon"
+                - label: Tuesday
+                  value: "tue"
+                - label: Wednesday
+                  value: "wed"
+                - label: Thursday
+                  value: "thu"
+                - label: Friday
+                  value: "fri"
+                - label: Saturday
+                  value: "sat"
+                - label: Sunday
+                  value: "sun"
+
+triggers:
+  - trigger: state
+    entity_id: !input "trigger_on_sensor"
+    from: "off"
+    to: "on"
+    id: trigger_sensor_turn_on
+
+  - trigger: state
+    entity_id: !input "trigger_off_sensor"
+    from: "on"
+    to: "off"
+    id: trigger_sensor_turn_off
+
+  - trigger: state
+    entity_id: !input "lights"
+    from: "off"
+    to: "on"
+    id: lights_turn_on
+
+  - trigger: state
+    entity_id: !input "lights"
+    from: "on"
+    to: "off"
+    id: lights_turn_off
+
+  - trigger: state
+    entity_id: !input "bypass"
+    from: "off"
+    to: "on"
+    id: bypass_state_change_to_on
+    for:
+      hours: 0
+      minutes: !input "bypass_auto_off_delay"
+      seconds: 0
+
+variables:
+  trigger_on_sensor: !input trigger_on_sensor
+  trigger_off_sensor: !input trigger_on_sensor
+  lights: !input lights
+  bypass: !input bypass
+  bypass_auto_off_delay: !input bypass_auto_off_delay
+  include_sun: !input include_sun
+  sun_elevation: !input sun_elevation
+  sun_elevation_rising: !input sun_elevation_rising
+  include_time: !input include_time
+  after_time: !input after_time
+  before_time: !input before_time
+  weekday_options: !input weekday_options
+
+condition:
+  - condition: or
+    conditions:
+      - "{{ include_sun == 'sun_disabled' }}"
+      - "{{ (include_sun == 'sun_enabled') and (is_state_attr('sun.sun', 'rising', false)) and (state_attr('sun.sun','elevation') <= sun_elevation | float(90)) }}"
+      - "{{ (include_sun == 'sun_enabled') and (is_state_attr('sun.sun', 'rising', true)) and (state_attr('sun.sun','elevation') <= sun_elevation_rising | float(90)) }}"
+  - condition: or
+    conditions:
+      - "{{ include_time == 'time_disabled' }}"
+      - condition: and
+        conditions:
+          - condition: time
+            after: !input after_time
+            before: !input before_time
+            weekday: !input weekday_options
+          - "{{ include_time == 'time_enabled' }}"
+
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id:
+              - trigger_sensor_turn_on
+          - condition: state
+            entity_id: !input bypass
+            state: "off"
+          - condition: state
+            entity_id: !input "trigger_on_sensor"
+            state: "on"
+          - condition: state
+            entity_id: !input lights
+            state: "off"
+        sequence:
+          - action: light.turn_on
+            metadata: {}
+            data: {}
+            target:
+              entity_id: !input lights
+      - conditions:
+          - condition: trigger
+            id:
+              - trigger_sensor_turn_off
+          - condition: state
+            entity_id: !input bypass
+            state: "off"
+          - condition: state
+            entity_id: !input "trigger_off_sensor"
+            state: "off"
+          - condition: state
+            entity_id: !input lights
+            state: "on"
+        sequence:
+          - action: light.turn_off
+            metadata: {}
+            data: {}
+            target:
+              entity_id: !input lights
+      # Workarround: first 5 seconds trigger.to_state.context.parent_id is filled with manual operation. https://github.com/home-assistant/core/issues/60302
+      - conditions:
+          - condition: trigger
+            id:
+              - lights_turn_on
+          - condition: template
+            value_template: "{{ trigger.to_state.context.user_id == none }}"
+          - condition: state
+            entity_id: !input "trigger_on_sensor"
+            state: "off"
+          - condition: state
+            entity_id: !input bypass
+            state: "off"
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: !input bypass
+            data: {}
+      # Workarround: first 5 seconds trigger.to_state.context.parent_id is filled with manual operation. https://github.com/home-assistant/core/issues/60302
+      - conditions:
+          - condition: trigger
+            id:
+              - lights_turn_off
+          - condition: template
+            value_template: "{{ trigger.to_state.context.user_id == none }}"
+          - condition: state
+            entity_id: !input "trigger_off_sensor"
+            state: "on"
+          - condition: state
+            entity_id: !input bypass
+            state: "off"
+        sequence:
+          - action: input_boolean.turn_on
+            target:
+              entity_id: !input bypass
+            data: {}
+      - conditions:
+          - condition: trigger
+            id:
+              - bypass_state_change_to_on
+          - condition: state
+            entity_id: !input bypass
+            state: "on"
+        sequence:
+          - action: input_boolean.turn_off
+            target:
+              entity_id: !input bypass
+            data: {}
+
+mode: single
