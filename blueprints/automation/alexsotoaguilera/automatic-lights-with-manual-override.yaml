@@ -244,14 +244,16 @@ condition:
       - "{{ (include_sun == 'sun_enabled') and (is_state_attr('sun.sun', 'rising', true)) and (state_attr('sun.sun','elevation') <= sun_elevation_rising | float(90)) }}"
   - condition: or
     conditions:
-      - "{{ include_time == 'time_disabled' }}"
+      - condition: template
+        value_template: "{{ include_time == 'time_disabled' }}"
       - condition: and
         conditions:
           - condition: time
             after: !input after_time
             before: !input before_time
             weekday: !input weekday_options
-          - "{{ include_time == 'time_enabled' }}"
+          - condition: template
+            value_template: "{{ include_time == 'time_enabled' }}"
 
 actions:
   - choose:
