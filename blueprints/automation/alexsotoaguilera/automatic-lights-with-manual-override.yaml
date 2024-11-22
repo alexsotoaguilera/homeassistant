@@ -335,6 +335,9 @@ actions:
           - condition: trigger
             id:
               - bypass_state_change_to_on
+          # Keeps bypass ON if it is enabled by UI
+          - condition: template
+            value_template: "{{ trigger.to_state.context.user_id == none }}"
           - condition: state
             entity_id: !input bypass
             state: "on"
