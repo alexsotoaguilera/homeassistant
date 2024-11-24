@@ -124,6 +124,52 @@ blueprint:
               step: 0.5
               unit_of_measurement: degrees
 
+    illuminance_settings:
+      name: "Illuminance"
+      icon: mdi:theme-light-dark
+      collapsed: true
+      input:
+        include_illuminance:
+          name: Use The Illuminance Options (Optional)
+          description: >
+            This option is used to add a condition that only allows the automation to run when it is dark or below the 'Illuminance' settings.
+            It's a global condition that can work alongside other options. For external illuminance sensor you can use (https://github.com/pnbruckner/ha-illuminance).
+          default: illuminance_disabled
+          selector:
+            select:
+              options:
+                - label: Enable the illuminance options
+                  value: "illuminance_enabled"
+                - label: Disable the illuminance options
+                  value: "illuminance_disabled"
+        illuminance_sensor:
+          name: Illuminance Sensor
+          description: >
+            Select the illuminance sensor to be used.
+          default: []
+          selector:
+            entity:
+              filter:
+                domain: sensor
+                device_class: illuminance
+        illuminance_value:
+          name: Illuminance - Low Lux Value
+          description: >
+            Set the Illuminance Low Lux Value. The light will turn ON when the lux level is below the set value.
+            This value must be equal or lower than the "High Lux Value" below.
+              * "10000": ("clear", "clearnight", "sunny", "windy", "exceptional"),
+              * "7500": ("partlycloudy", "partlysunny", "mostlysunny", "mostlyclear", "hazy", "hazysunshine", "intermittentclouds"),
+              * "2500": ("cloudy", "mostlycloudy"),
+              * "1000": ("fog", "rainy", "showers", "pouring", "snowy", "snowyheavy", "snowyrainy", "flurries", "chanceflurries", "chancerain", "chancesleet", "drearyovercast", "sleet"),
+              * "200": ("hail", "lightning", "tstorms")
+          default: 2500
+          selector:
+            number:
+              min: 0
+              max: 10000
+              step: 10
+              unit_of_measurement: lux
+
     time_settings:
       name: "Time"
       icon: mdi:clock-outline
@@ -231,6 +277,9 @@ variables:
   include_sun: !input include_sun
   sun_elevation: !input sun_elevation
   sun_elevation_rising: !input sun_elevation_rising
+  include_illuminance: !input include_illuminance
+  illuminance_sensor: !input illuminance_sensor
+  illuminance_value: !input illuminance_value
   include_time: !input include_time
   after_time: !input after_time
   before_time: !input before_time
@@ -242,6 +291,10 @@ condition:
       - "{{ include_sun == 'sun_disabled' }}"
       - "{{ (include_sun == 'sun_enabled') and (is_state_attr('sun.sun', 'rising', false)) and (state_attr('sun.sun','elevation') <= sun_elevation | float(90)) }}"
       - "{{ (include_sun == 'sun_enabled') and (is_state_attr('sun.sun', 'rising', true)) and (state_attr('sun.sun','elevation') <= sun_elevation_rising | float(90)) }}"
+  - condition: or
+    conditions:
+      - "{{ include_illuminance == 'illuminance_disabled' }}"
+      - "{{ (include_illuminance == 'illuminance_enabled') and (states(illuminance_sensor)|int <= illuminance_value) }}"
   - condition: or
     conditions:
       - condition: template
