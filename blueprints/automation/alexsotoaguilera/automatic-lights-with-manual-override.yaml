@@ -28,7 +28,7 @@ blueprint:
         trigger_off_sensor:
           name: Trigger OFF Sensor - Binary Sensors *
           description:
-            The trigger sensor is responsible for turning the lights and switchesOFF. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
+            The trigger sensor is responsible for turning the lights and switches OFF. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
             For use multiple trigger sensors group them together using a group helper.
           default: []
           selector:
