@@ -282,6 +282,13 @@ triggers:
       minutes: !input "bypass_auto_off_delay"
       seconds: 0
 
+  - trigger: state
+    entity_id: !input "bypass_input_boolean"
+    from: "on"
+    to: "off"
+    id: bypass_state_change_to_off
+
+
 variables:
   trigger_on_sensor: !input trigger_on_sensor
   trigger_off_sensor: !input trigger_on_sensor
@@ -355,7 +362,7 @@ conditions:
               value_template: "{{ include_bypass == 'bypass_disabled' }}"
             - condition: template
               value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
-      - condition: and # Turn Bypass ON
+      - condition: and # Turn Bypass ON by physical device
         conditions:
           - condition: template
             value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
@@ -383,7 +390,7 @@ conditions:
               - condition: state
                 entity_id: !input "trigger_on_sensor"
                 state: "off"
-      - condition: and  # Turn Bypass OFF
+      - condition: and  # Turn Bypass ON
         conditions:
           - condition: trigger
             id: "bypass_state_change_to_on"
@@ -391,6 +398,12 @@ conditions:
             value_template: "{{ include_bypass == 'bypass_enabled' }}"
           - condition: template # Keeps bypass ON if it is enabled by UI
             value_template: "{{ trigger.to_state.context.user_id == none }}"
+      - condition: and  # Turn Bypass OFF
+        conditions:
+          - condition: trigger
+            id: "bypass_state_change_to_off"
+          - condition: template
+            value_template: "{{ include_bypass == 'bypass_enabled' }}"
 
 actions:
   - choose:
@@ -441,5 +454,36 @@ actions:
             target:
               entity_id: !input bypass_input_boolean
             data: {}
-
+      - conditions:
+          - condition: trigger
+            id:
+              - bypass_state_change_to_off
+        sequence:
+          - choose:
+              - conditions:
+                  - condition: state
+                    entity_id: !input lights
+                    state: "on"
+                  - condition: state
+                    entity_id: !input "trigger_off_sensor"
+                    state: "off"
+                sequence:
+                  - action: light.turn_off
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: !input lights
+              - conditions:
+                  - condition: state
+                    entity_id: !input lights
+                    state: "off"
+                  - condition: state
+                    entity_id: !input "trigger_on_sensor"
+                    state: "on"
+                sequence:
+                  - action: light.turn_on
+                    metadata: {}
+                    data: {}
+                    target:
+                      entity_id: !input lights
 mode: single
