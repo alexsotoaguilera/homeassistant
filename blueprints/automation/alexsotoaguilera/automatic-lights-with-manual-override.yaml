@@ -13,10 +13,10 @@ blueprint:
       icon: mdi:cog-outline
       collapsed: false
       input:
-        trigger_on_sensor:
-          name: Trigger ON Sensor - Binary Sensors *
+        trigger_sensor:
+          name: Trigger Sensor - Binary Sensor *
           description:
-            The trigger sensor is responsible for turning the lights and switches ON. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
+            The trigger sensor is responsible for turning the lights and switches ON/OFF. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
             For use multiple trigger sensors group them together using a group helper.
           default: []
           selector:
@@ -25,18 +25,7 @@ blueprint:
                 domain:
                   - binary_sensor
               multiple: false
-        trigger_off_sensor:
-          name: Trigger OFF Sensor - Binary Sensors *
-          description:
-            The trigger sensor is responsible for turning the lights and switches OFF. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
-            For use multiple trigger sensors group them together using a group helper.
-          default: []
-          selector:
-            entity:
-              filter:
-                domain:
-                  - binary_sensor
-              multiple: false
+
     lights_settings:
       name: "Lights *"
       icon: mdi:lightbulb-outline
@@ -249,13 +238,13 @@ blueprint:
 
 triggers:
   - trigger: state
-    entity_id: !input "trigger_on_sensor"
+    entity_id: !input "trigger_sensor"
     from: "off"
     to: "on"
     id: trigger_sensor_turn_on
 
   - trigger: state
-    entity_id: !input "trigger_off_sensor"
+    entity_id: !input "trigger_sensor"
     from: "on"
     to: "off"
     id: trigger_sensor_turn_off
@@ -290,8 +279,7 @@ triggers:
 
 
 variables:
-  trigger_on_sensor: !input trigger_on_sensor
-  trigger_off_sensor: !input trigger_on_sensor
+  trigger_sensor: !input trigger_sensor
   lights: !input lights
   include_bypass: !input include_bypass
   bypass_input_boolean: !input bypass_input_boolean
@@ -381,14 +369,14 @@ conditions:
               - condition: trigger
                 id: "lights_turn_off"
               - condition: state
-                entity_id: !input "trigger_off_sensor"
+                entity_id: !input "trigger_sensor"
                 state: "on"
             - condition: and
               conditions:
               - condition: trigger
                 id: "lights_turn_on"
               - condition: state
-                entity_id: !input "trigger_on_sensor"
+                entity_id: !input "trigger_sensor"
                 state: "off"
       - condition: and  # Turn Bypass ON
         conditions:
@@ -465,7 +453,7 @@ actions:
                     entity_id: !input lights
                     state: "on"
                   - condition: state
-                    entity_id: !input "trigger_off_sensor"
+                    entity_id: !input "trigger_sensor"
                     state: "off"
                 sequence:
                   - action: light.turn_off
@@ -478,7 +466,7 @@ actions:
                     entity_id: !input lights
                     state: "off"
                   - condition: state
-                    entity_id: !input "trigger_on_sensor"
+                    entity_id: !input "trigger_sensor"
                     state: "on"
                 sequence:
                   - action: light.turn_on
