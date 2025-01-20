@@ -15,7 +15,7 @@ blueprint:
         device:
           filter:
             manufacturer: SONOFF
-            model: Zigbee smart switch (ZBMINIR2)
+            model: Zigbee smart switch
           multiple: false
 
     controlled_light:
