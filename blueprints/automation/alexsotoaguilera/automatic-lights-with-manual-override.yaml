@@ -298,13 +298,24 @@ variables:
 conditions:
   - condition: or
     conditions:
-      - condition: and # Turn light ON with conditions
+      - condition: and # Turn light ON with conditions (by sensor or by turn off bypass)
         conditions:
-          - condition: trigger
-            id: trigger_sensor_turn_on
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: trigger_sensor_turn_on
+              - condition: and
+                conditions:
+                  - condition: trigger
+                    id: bypass_state_change_to_off
+                  - condition: template
+                    value_template: "{{ include_bypass == 'bypass_enabled' }}"
           - condition: state
             entity_id: !input "lights"
             state: "off"
+          - condition: state
+            entity_id: !input "trigger_sensor"
+            state: "on"
           - condition: or
             conditions:
             - condition: template
@@ -337,13 +348,24 @@ conditions:
                     weekday: !input weekday_options
                   - condition: template
                     value_template: "{{ include_time == 'time_enabled' }}"
-      - condition: and # Turn lights OFF
+      - condition: and # Turn lights OFF (by sensor or by turn off bypass)
         conditions:
-          - condition: trigger
-            id: "trigger_sensor_turn_off"
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: trigger_sensor_turn_off
+              - condition: and
+                conditions:
+                  - condition: trigger
+                    id: bypass_state_change_to_off
+                  - condition: template
+                    value_template: "{{ include_bypass == 'bypass_enabled' }}"
           - condition: state
             entity_id: !input "lights"
             state: "on"
+          - condition: state
+            entity_id: !input "trigger_sensor"
+            state: "off"
           - condition: or
             conditions:
             - condition: template
@@ -386,19 +408,16 @@ conditions:
             value_template: "{{ include_bypass == 'bypass_enabled' }}"
           - condition: template # Keeps bypass ON if it is enabled by UI
             value_template: "{{ trigger.to_state.context.user_id == none }}"
-      - condition: and  # Turn Bypass OFF
-        conditions:
-          - condition: trigger
-            id: "bypass_state_change_to_off"
-          - condition: template
-            value_template: "{{ include_bypass == 'bypass_enabled' }}"
 
 actions:
   - choose:
       - conditions:
-          - condition: trigger
-            id:
-              - trigger_sensor_turn_on
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: trigger_sensor_turn_on
+              - condition: trigger
+                id: bypass_state_change_to_off
         sequence:
           - action: light.turn_on
             metadata: {}
@@ -406,9 +425,12 @@ actions:
             target:
               entity_id: !input lights
       - conditions:
-          - condition: trigger
-            id:
-              - trigger_sensor_turn_off
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: trigger_sensor_turn_off
+              - condition: trigger
+                id: bypass_state_change_to_off
         sequence:
           - action: light.turn_off
             metadata: {}
@@ -442,36 +464,5 @@ actions:
             target:
               entity_id: !input bypass_input_boolean
             data: {}
-      - conditions:
-          - condition: trigger
-            id:
-              - bypass_state_change_to_off
-        sequence:
-          - choose:
-              - conditions:
-                  - condition: state
-                    entity_id: !input lights
-                    state: "on"
-                  - condition: state
-                    entity_id: !input "trigger_sensor"
-                    state: "off"
-                sequence:
-                  - action: light.turn_off
-                    metadata: {}
-                    data: {}
-                    target:
-                      entity_id: !input lights
-              - conditions:
-                  - condition: state
-                    entity_id: !input lights
-                    state: "off"
-                  - condition: state
-                    entity_id: !input "trigger_sensor"
-                    state: "on"
-                sequence:
-                  - action: light.turn_on
-                    metadata: {}
-                    data: {}
-                    target:
-                      entity_id: !input lights
+
 mode: single
