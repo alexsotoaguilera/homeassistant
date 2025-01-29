@@ -340,14 +340,11 @@ conditions:
             conditions:
               - condition: template
                 value_template: "{{ include_time == 'time_disabled' }}"
-              - condition: and
-                conditions:
-                  - condition: time
-                    after: !input after_time
-                    before: !input before_time
-                    weekday: !input weekday_options
-                  - condition: template
-                    value_template: "{{ include_time == 'time_enabled' }}"
+              - condition: time
+                after: !input after_time
+                before: !input before_time
+                weekday: !input weekday_options
+
       - condition: and # Turn lights OFF (by sensor or by turn off bypass)
         conditions:
           - condition: or
@@ -374,6 +371,12 @@ conditions:
               value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
       - condition: and # Turn Bypass ON by physical device
         conditions:
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: lights_turn_on
+              - condition: trigger
+                id: lights_turn_off
           - condition: template
             value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
           - condition: or
