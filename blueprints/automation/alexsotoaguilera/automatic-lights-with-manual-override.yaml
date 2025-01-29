@@ -376,30 +376,32 @@ conditions:
         conditions:
           - condition: template
             value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
-          - condition: and # Triggered by Physical device
+          - condition: or
             conditions:
-            - condition: template
-              value_template: "{{ trigger.to_state.context.id != none }}"
-            - condition: template
-              value_template: "{{ trigger.to_state.context.parent_id == none }}"
-            - condition: template
-              value_template: "{{ trigger.to_state.context.user_id == none }}"
-          - condition: or # WORKARROUND: first 5 seconds trigger.to_state.context.parent_id is filled with manual operation. https://github.com/home-assistant/core/issues/60302
-            conditions:
-            - condition: and
-              conditions:
-              - condition: trigger
-                id: "lights_turn_off"
-              - condition: state
-                entity_id: !input "trigger_sensor"
-                state: "on"
-            - condition: and
-              conditions:
-              - condition: trigger
-                id: "lights_turn_on"
-              - condition: state
-                entity_id: !input "trigger_sensor"
-                state: "off"
+              - condition: and # Triggered by Physical device
+                conditions:
+                - condition: template
+                  value_template: "{{ trigger.to_state.context.id != none }}"
+                - condition: template
+                  value_template: "{{ trigger.to_state.context.parent_id == none }}"
+                - condition: template
+                  value_template: "{{ trigger.to_state.context.user_id == none }}"
+              - condition: or # WORKARROUND: first 5 seconds trigger.to_state.context.parent_id is filled with manual operation. https://github.com/home-assistant/core/issues/60302
+                conditions:
+                - condition: and
+                  conditions:
+                  - condition: trigger
+                    id: "lights_turn_off"
+                  - condition: state
+                    entity_id: !input "trigger_sensor"
+                    state: "on"
+                - condition: and
+                  conditions:
+                  - condition: trigger
+                    id: "lights_turn_on"
+                  - condition: state
+                    entity_id: !input "trigger_sensor"
+                    state: "off"
       - condition: and  # Turn Bypass ON
         conditions:
           - condition: trigger
