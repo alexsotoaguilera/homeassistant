@@ -2,22 +2,25 @@ blueprint:
   name: Automatic lights with manual override
   description: Automatic lights with manual override
   domain: automation
-  source_url: https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/automatic-lights-with-manual-override.yaml
+  source_url: >-
+    https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/automatic-lights-with-manual-override.yaml
   author: Alex Soto Aguilera
   homeassistant:
     min_version: 2022.4.0
-
   input:
-    trigger:
-      name: "Trigger *"
-      icon: mdi:cog-outline
+    trigger_on:
+      name: Trigger ON *
+      icon: 'mdi:cog-outline'
       collapsed: false
       input:
-        trigger_sensor:
-          name: Trigger Sensor - Binary Sensor *
-          description:
-            The trigger sensor is responsible for turning the lights and switches ON/OFF. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
-            For use multiple trigger sensors group them together using a group helper.
+        trigger_on_sensor:
+          name: Trigger On Sensor - Binary Sensor *
+          description: >-
+            The trigger sensor is responsible for turning the lights and
+            switches ON. You can choose any [binary
+            sensors](https://www.home-assistant.io/integrations/binary_sensor/)
+            you prefer as triggers. For use multiple trigger sensors group them
+            together using a group helper.
           default: []
           selector:
             entity:
@@ -25,10 +28,29 @@ blueprint:
                 domain:
                   - binary_sensor
               multiple: false
-
+    trigger_off:
+      name: Trigger OFF *
+      icon: 'mdi:cog-outline'
+      collapsed: false
+      input:
+        trigger_off_sensor:
+          name: Trigger Off Sensor - Binary Sensor *
+          description: >-
+            The trigger sensor is responsible for turning the lights and
+            switches OFF. You can choose any [binary
+            sensors](https://www.home-assistant.io/integrations/binary_sensor/)
+            you prefer as triggers. For use multiple trigger sensors group them
+            together using a group helper.
+          default: []
+          selector:
+            entity:
+              filter:
+                domain:
+                  - binary_sensor
+              multiple: false
     lights_settings:
-      name: "Lights *"
-      icon: mdi:lightbulb-outline
+      name: Lights *
+      icon: 'mdi:lightbulb-outline'
       collapsed: false
       input:
         lights:
@@ -42,40 +64,44 @@ blueprint:
                   - light
                   - switch
               multiple: true
-
     bypass_settings:
-      name: "Bypass"
-      icon: mdi:cog-pause-outline
+      name: Bypass
+      icon: 'mdi:cog-pause-outline'
       collapsed: true
       input:
         include_bypass:
           name: Use The Bypass Option (Optional)
-          description:
-            Allows the lights to be operated manually, deactivates the trigger sensor for the defined time when you manually operate the light.
-            Select the input boolean helper to use to deactivate the trigger sensor. Create one specifically for this automation.
+          description: >-
+            Allows the lights to be operated manually, deactivates the trigger
+            sensor for the defined time when you manually operate the light.
+            Select the input boolean helper to use to deactivate the trigger
+            sensor. Create one specifically for this automation.
           default: bypass_disabled
           selector:
             select:
               options:
                 - label: Enable the bypass option
-                  value: "bypass_enabled"
+                  value: bypass_enabled
                 - label: Disable the bypass option
-                  value: "bypass_disabled"
+                  value: bypass_disabled
         bypass_input_boolean:
           name: Bypass Input Boolean Helper
-          description:
-            Allows the lights to be operated manually, deactivates the trigger sensor for the defined time when you manually operate the light.
-            Select the input boolean helper to use to deactivate the trigger sensor. Create one specifically for this automation.
+          description: >-
+            Allows the lights to be operated manually, deactivates the trigger
+            sensor for the defined time when you manually operate the light.
+            Select the input boolean helper to use to deactivate the trigger
+            sensor. Create one specifically for this automation.
           default: []
           selector:
             entity:
               domain:
                 - input_boolean
               multiple: false
-
         bypass_auto_off_delay:
           name: Bypass Auto OFF - Time Delay
-          description: Set the bypass auto OFF time delay. The time delay starts from the last bypass that was turned ON.
+          description: >-
+            Set the bypass auto OFF time delay. The time delay starts from the
+            last bypass that was turned ON.
           default: 30
           selector:
             number:
@@ -83,30 +109,33 @@ blueprint:
               max: 240
               step: 1
               unit_of_measurement: minutes
-
     sun_settings:
-      name: "Sun Elevation"
-      icon: mdi:weather-sunny
+      name: Sun Elevation
+      icon: 'mdi:weather-sunny'
       collapsed: true
       input:
         include_sun:
           name: Use The Sun Option (Optional)
-          description:
-            This option is used to add a condition that only allows the automation to run when it is dark or below the 'Sun Elevation' settings.
-            It's a global condition that can work alongside other options.
+          description: >-
+            This option is used to add a condition that only allows the
+            automation to run when it is dark or below the 'Sun Elevation'
+            settings. It's a global condition that can work alongside other
+            options.
           default: sun_disabled
           selector:
             select:
               options:
                 - label: Enable the sun option
-                  value: "sun_enabled"
+                  value: sun_enabled
                 - label: Disable the sun option
-                  value: "sun_disabled"
+                  value: sun_disabled
         sun_elevation:
           name: Sun Elevation Falling
-          description:
-            The sun elevation falling refers to the angle between the sun and the horizon when the sun is setting.
-            A negative value indicates that the sun is BELOW the horizon. For example, a setting guide of -1.5 corresponds to dusk
+          description: >-
+            The sun elevation falling refers to the angle between the sun and
+            the horizon when the sun is setting. A negative value indicates that
+            the sun is BELOW the horizon. For example, a setting guide of -1.5
+            corresponds to dusk
           default: -1.5
           selector:
             number:
@@ -116,38 +145,42 @@ blueprint:
               unit_of_measurement: degrees
         sun_elevation_rising:
           name: Sun Elevation Rising
-          description:
-            The sun elevation rising refers to the angle between the sun and the horizon during sunrise.
-            A negative value indicates that the sun is BELOW the horizon. For example, a setting guide of -4.0 corresponds to dawn.
-          default: -4.0
+          description: >-
+            The sun elevation rising refers to the angle between the sun and the
+            horizon during sunrise. A negative value indicates that the sun is
+            BELOW the horizon. For example, a setting guide of -4.0 corresponds
+            to dawn.
+          default: -4
           selector:
             number:
               min: -10
               max: 5
               step: 0.5
               unit_of_measurement: degrees
-
     illuminance_settings:
-      name: "Illuminance"
-      icon: mdi:theme-light-dark
+      name: Illuminance
+      icon: 'mdi:theme-light-dark'
       collapsed: true
       input:
         include_illuminance:
           name: Use The Illuminance Options (Optional)
           description: >
-            This option is used to add a condition that only allows the automation to run when it is dark or below the 'Illuminance' settings.
-            It's a global condition that can work alongside other options. For external illuminance sensor you can use (https://github.com/pnbruckner/ha-illuminance).
+            This option is used to add a condition that only allows the
+            automation to run when it is dark or below the 'Illuminance'
+            settings. It's a global condition that can work alongside other
+            options. For external illuminance sensor you can use
+            (https://github.com/pnbruckner/ha-illuminance).
           default: illuminance_disabled
           selector:
             select:
               options:
                 - label: Enable the illuminance options
-                  value: "illuminance_enabled"
+                  value: illuminance_enabled
                 - label: Disable the illuminance options
-                  value: "illuminance_disabled"
+                  value: illuminance_disabled
         illuminance_sensor:
           name: Illuminance Sensor
-          description: >
+          description: |
             Select the illuminance sensor to be used.
           default: []
           selector:
@@ -158,8 +191,9 @@ blueprint:
         illuminance_value:
           name: Illuminance - Low Lux Value
           description: >
-            Set the Illuminance Low Lux Value. The light will turn ON when the lux level is below the set value.
-            This value must be equal or lower than the "High Lux Value" below.
+            Set the Illuminance Low Lux Value. The light will turn ON when the
+            lux level is below the set value. This value must be equal or lower
+            than the "High Lux Value" below.
               * "10000": ("clear", "clearnight", "sunny", "windy", "exceptional"),
               * "7500": ("partlycloudy", "partlysunny", "mostlysunny", "mostlyclear", "hazy", "hazysunshine", "intermittentclouds"),
               * "2500": ("cloudy", "mostlycloudy"),
@@ -172,42 +206,44 @@ blueprint:
               max: 10000
               step: 10
               unit_of_measurement: lux
-
     time_settings:
-      name: "Time"
-      icon: mdi:clock-outline
+      name: Time
+      icon: 'mdi:clock-outline'
       collapsed: true
       input:
         include_time:
           name: Use The Time Options (Optional)
-          description:
-            This option is used to add a condition that only allows the automation to run between the start time and end time settings on the selected weekdays.
-            These time settings are global conditions that can work alongside other options.
+          description: >-
+            This option is used to add a condition that only allows the
+            automation to run between the start time and end time settings on
+            the selected weekdays. These time settings are global conditions
+            that can work alongside other options.
           default: time_disabled
           selector:
             select:
               options:
                 - label: Enable the time options
-                  value: "time_enabled"
+                  value: time_enabled
                 - label: Disable the time options
-                  value: "time_disabled"
+                  value: time_disabled
         after_time:
           name: Start Time
           description: Set the start time.
-          default: 00:00:00
+          default: '00:00:00'
           selector:
-            time:
+            time: null
         before_time:
           name: End Time
           description: Set the end time.
-          default: 00:00:00
+          default: '00:00:00'
           selector:
-            time:
+            time: null
         weekday_options:
           name: Weekdays
-          description:
+          description: >-
             Select the days of the week you would like the automation to run.
-            You must select "Enable the time options" above for the weekday selections to work.
+            You must select "Enable the time options" above for the weekday
+            selections to work.
           default:
             - mon
             - tue
@@ -222,64 +258,57 @@ blueprint:
               mode: list
               options:
                 - label: Monday
-                  value: "mon"
+                  value: mon
                 - label: Tuesday
-                  value: "tue"
+                  value: tue
                 - label: Wednesday
-                  value: "wed"
+                  value: wed
                 - label: Thursday
-                  value: "thu"
+                  value: thu
                 - label: Friday
-                  value: "fri"
+                  value: fri
                 - label: Saturday
-                  value: "sat"
+                  value: sat
                 - label: Sunday
-                  value: "sun"
-
+                  value: sun
 triggers:
   - trigger: state
-    entity_id: !input "trigger_sensor"
-    from: "off"
-    to: "on"
+    entity_id: !input "trigger_on_sensor"
+    from: 'off'
+    to: 'on'
     id: trigger_sensor_turn_on
-
   - trigger: state
-    entity_id: !input "trigger_sensor"
-    from: "on"
-    to: "off"
+    entity_id: !input "trigger_off_sensor"
+    from: 'on'
+    to: 'off'
     id: trigger_sensor_turn_off
-
   - trigger: state
     entity_id: !input "lights"
-    from: "off"
-    to: "on"
+    from: 'off'
+    to: 'on'
     id: lights_turn_on
-
   - trigger: state
     entity_id: !input "lights"
-    from: "on"
-    to: "off"
+    from: 'on'
+    to: 'off'
     id: lights_turn_off
-
   - trigger: state
     entity_id: !input "bypass_input_boolean"
-    from: "off"
-    to: "on"
+    from: 'off'
+    to: 'on'
     id: bypass_state_change_to_on
     for:
       hours: 0
       minutes: !input "bypass_auto_off_delay"
       seconds: 0
-
   - trigger: state
     entity_id: !input "bypass_input_boolean"
-    from: "on"
-    to: "off"
+    from: 'on'
+    to: 'off'
     id: bypass_state_change_to_off
-
-
 variables:
-  trigger_sensor: !input trigger_sensor
+  trigger_on_sensor: !input trigger_on_sensor
+  trigger_off_sensor: !input trigger_off_sensor
   lights: !input lights
   include_bypass: !input include_bypass
   bypass_input_boolean: !input bypass_input_boolean
@@ -294,11 +323,10 @@ variables:
   after_time: !input after_time
   before_time: !input before_time
   weekday_options: !input weekday_options
-
 conditions:
   - condition: or
     conditions:
-      - condition: and # Turn light ON with conditions (by sensor or by turn off bypass)
+      - condition: and  # Turn light ON with conditions (by sensor or by turn off bypass)
         conditions:
           - condition: or
             conditions:
@@ -309,42 +337,53 @@ conditions:
                   - condition: trigger
                     id: bypass_state_change_to_off
                   - condition: template
-                    value_template: "{{ include_bypass == 'bypass_enabled' }}"
+                    value_template: '{{ include_bypass == ''bypass_enabled'' }}'
           - condition: state
             entity_id: !input "lights"
-            state: "off"
+            state: 'off'
           - condition: state
-            entity_id: !input "trigger_sensor"
-            state: "on"
-          - condition: or
-            conditions:
-            - condition: template
-              value_template: "{{ include_bypass == 'bypass_disabled' }}"
-            - condition: template
-              value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
+            entity_id: !input "trigger_on_sensor"
+            state: 'on'
           - condition: or
             conditions:
               - condition: template
-                value_template: "{{ include_sun == 'sun_disabled' }}"
+                value_template: '{{ include_bypass == ''bypass_disabled'' }}'
               - condition: template
-                value_template: "{{ (include_sun == 'sun_enabled') and (is_state_attr('sun.sun', 'rising', false)) and (state_attr('sun.sun','elevation') <= sun_elevation | float(90)) }}"
-              - condition: template
-                value_template: "{{ (include_sun == 'sun_enabled') and (is_state_attr('sun.sun', 'rising', true)) and (state_attr('sun.sun','elevation') <= sun_elevation_rising | float(90)) }}"
+                value_template: >-
+                  {{ (include_bypass == 'bypass_enabled') and
+                  (states(bypass_input_boolean) == 'off') }}
           - condition: or
             conditions:
               - condition: template
-                value_template: "{{ include_illuminance == 'illuminance_disabled' }}"
+                value_template: '{{ include_sun == ''sun_disabled'' }}'
               - condition: template
-                value_template: "{{ (include_illuminance == 'illuminance_enabled') and (states(illuminance_sensor)|int <= illuminance_value) }}"
+                value_template: >-
+                  {{ (include_sun == 'sun_enabled') and
+                  (is_state_attr('sun.sun', 'rising', false)) and
+                  (state_attr('sun.sun','elevation') <= sun_elevation |
+                  float(90)) }}
+              - condition: template
+                value_template: >-
+                  {{ (include_sun == 'sun_enabled') and
+                  (is_state_attr('sun.sun', 'rising', true)) and
+                  (state_attr('sun.sun','elevation') <= sun_elevation_rising |
+                  float(90)) }}
           - condition: or
             conditions:
               - condition: template
-                value_template: "{{ include_time == 'time_disabled' }}"
+                value_template: '{{ include_illuminance == ''illuminance_disabled'' }}'
+              - condition: template
+                value_template: >-
+                  {{ (include_illuminance == 'illuminance_enabled') and
+                  (states(illuminance_sensor)|int <= illuminance_value) }}
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: '{{ include_time == ''time_disabled'' }}'
               - condition: time
                 after: !input after_time
                 before: !input before_time
                 weekday: !input weekday_options
-
       - condition: and # Turn lights OFF (by sensor or by turn off bypass)
         conditions:
           - condition: or
@@ -356,20 +395,22 @@ conditions:
                   - condition: trigger
                     id: bypass_state_change_to_off
                   - condition: template
-                    value_template: "{{ include_bypass == 'bypass_enabled' }}"
+                    value_template: '{{ include_bypass == ''bypass_enabled'' }}'
           - condition: state
             entity_id: !input "lights"
-            state: "on"
+            state: 'on'
           - condition: state
-            entity_id: !input "trigger_sensor"
-            state: "off"
+            entity_id: !input "trigger_off_sensor"
+            state: 'off'
           - condition: or
             conditions:
-            - condition: template
-              value_template: "{{ include_bypass == 'bypass_disabled' }}"
-            - condition: template
-              value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
-      - condition: and # Turn Bypass ON by physical device
+              - condition: template
+                value_template: '{{ include_bypass == ''bypass_disabled'' }}'
+              - condition: template
+                value_template: >-
+                  {{ (include_bypass == 'bypass_enabled') and
+                  (states(bypass_input_boolean) == 'off') }}
+      - condition: and
         conditions:
           - condition: or
             conditions:
@@ -378,46 +419,47 @@ conditions:
               - condition: trigger
                 id: lights_turn_off
           - condition: template
-            value_template: "{{ (include_bypass == 'bypass_enabled') and (states(bypass_input_boolean) == 'off') }}"
+            value_template: >-
+              {{ (include_bypass == 'bypass_enabled') and
+              (states(bypass_input_boolean) == 'off') }}
           - condition: or
             conditions:
-              - condition: and # Triggered by Physical device
+              - condition: and
                 conditions:
-                - condition: template
-                  value_template: "{{ trigger.to_state.context.id != none }}"
-                - condition: template
-                  value_template: "{{ trigger.to_state.context.parent_id == none }}"
-                - condition: template
-                  value_template: "{{ trigger.to_state.context.user_id == none }}"
+                  - condition: template
+                    value_template: '{{ trigger.to_state.context.id != none }}'
+                  - condition: template
+                    value_template: '{{ trigger.to_state.context.parent_id == none }}'
+                  - condition: template
+                    value_template: '{{ trigger.to_state.context.user_id == none }}'
               - condition: and
                 conditions:
                   - condition: or # WORKARROUND: first 5 seconds trigger.to_state.context.parent_id is filled with manual operation. https://github.com/home-assistant/core/issues/60302
                     conditions:
                       - condition: and
                         conditions:
-                        - condition: trigger
-                          id: "lights_turn_off"
-                        - condition: state
-                          entity_id: !input "trigger_sensor"
-                          state: "on"
+                          - condition: trigger
+                            id: lights_turn_off
+                          - condition: state
+                            entity_id: !input "trigger_on_sensor"
+                            state: 'on'
                       - condition: and
                         conditions:
-                        - condition: trigger
-                          id: "lights_turn_on"
-                        - condition: state
-                          entity_id: !input "trigger_sensor"
-                          state: "off"
-                  - condition: template # Keeps bypass OFF if light is enabled by UI
-                    value_template: "{{ trigger.to_state.context.user_id == none }}"
-      - condition: and  # Turn Bypass OFF
+                          - condition: trigger
+                            id: lights_turn_on
+                          - condition: state
+                            entity_id: !input "trigger_off_sensor"
+                            state: 'off'
+                  - condition: template
+                    value_template: '{{ trigger.to_state.context.user_id == none }}'
+      - condition: and # Turn Bypass OFF
         conditions:
           - condition: trigger
-            id: "bypass_state_change_to_on"
+            id: bypass_state_change_to_on
           - condition: template
-            value_template: "{{ include_bypass == 'bypass_enabled' }}"
-          - condition: template # Keeps bypass ON if it is enabled by UI
-            value_template: "{{ trigger.to_state.context.user_id == none }}"
-
+            value_template: '{{ include_bypass == ''bypass_enabled'' }}'
+          - condition: template
+            value_template: '{{ trigger.to_state.context.user_id == none }}'
 actions:
   - choose:
       - conditions:
@@ -473,5 +515,4 @@ actions:
             target:
               entity_id: !input bypass_input_boolean
             data: {}
-
 mode: single
