@@ -410,7 +410,7 @@ conditions:
                 value_template: >-
                   {{ (include_bypass == 'bypass_enabled') and
                   (states(bypass_input_boolean) == 'off') }}
-      - condition: and
+      - condition: and # Turn Bypass ON
         conditions:
           - condition: or
             conditions:
@@ -422,6 +422,38 @@ conditions:
             value_template: >-
               {{ (include_bypass == 'bypass_enabled') and
               (states(bypass_input_boolean) == 'off') }}
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: '{{ include_sun == ''sun_disabled'' }}'
+              - condition: template
+                value_template: >-
+                  {{ (include_sun == 'sun_enabled') and
+                  (is_state_attr('sun.sun', 'rising', false)) and
+                  (state_attr('sun.sun','elevation') <= sun_elevation |
+                  float(90)) }}
+              - condition: template
+                value_template: >-
+                  {{ (include_sun == 'sun_enabled') and
+                  (is_state_attr('sun.sun', 'rising', true)) and
+                  (state_attr('sun.sun','elevation') <= sun_elevation_rising |
+                  float(90)) }}
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: '{{ include_illuminance == ''illuminance_disabled'' }}'
+              - condition: template
+                value_template: >-
+                  {{ (include_illuminance == 'illuminance_enabled') and
+                  (states(illuminance_sensor)|int <= illuminance_value) }}
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: '{{ include_time == ''time_disabled'' }}'
+              - condition: time
+                after: !input after_time
+                before: !input before_time
+                weekday: !input weekday_options
           - condition: or
             conditions:
               - condition: and
