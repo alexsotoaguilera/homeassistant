@@ -499,8 +499,13 @@ actions:
             conditions:
               - condition: trigger
                 id: trigger_sensor_turn_on
-              - condition: trigger
-                id: bypass_state_change_to_off
+              - condition: and
+                conditions:
+                - condition: trigger
+                  id: bypass_state_change_to_off
+                - condition: state
+                  entity_id: !input "lights"
+                  state: 'off'
         sequence:
           - action: light.turn_on
             metadata: {}
@@ -512,8 +517,13 @@ actions:
             conditions:
               - condition: trigger
                 id: trigger_sensor_turn_off
-              - condition: trigger
-                id: bypass_state_change_to_off
+              - condition: and
+                conditions:
+                - condition: trigger
+                  id: bypass_state_change_to_off
+                - condition: state
+                  entity_id: !input "lights"
+                  state: 'on'
         sequence:
           - action: light.turn_off
             metadata: {}
