@@ -5,7 +5,7 @@ blueprint:
     Supports SINGLE, DOUBLE and HOLD without losing first press.
   domain: automation
   author: Alex Soto Aguilera
-  source_url: https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/smartbutton-mqtt-event-entities.yaml
+  source_url: https://github.com/alexsotoaguilera/homeassistant/blob/main/blueprints/automation/alexsotoaguilera/smartbutton-mqtt-event-entities.yaml
   homeassistant:
     min_version: 2022.4.0
 
