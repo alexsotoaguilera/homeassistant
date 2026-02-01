@@ -1,5 +1,5 @@
 blueprint:
-  name: Smart Button with MQTT Event Entities
+  name: Smart Button with Event Entities
   description: >-
     Configure Smart Button with Event Entities (experimental).
     Supports SINGLE, DOUBLE and HOLD without losing first press.
