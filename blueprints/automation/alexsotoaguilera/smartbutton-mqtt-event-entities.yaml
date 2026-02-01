@@ -4,8 +4,8 @@ blueprint:
     Configure Smart Button with Event Entities (experimental).
     Supports SINGLE, DOUBLE and HOLD without losing first press.
   domain: automation
-  author: Alex Soto Aguilera
-  source_url: https://github.com/alexsotoaguilera/homeassistant/blob/main/blueprints/automation/alexsotoaguilera/smartbutton-mqtt-event-entities.yaml
+  author: Alex Soto Aguilera (migrated to Event Entities)
+  source_url: https://github.com/alexsotoaguilera/homeassistant/tree/main/blueprints/automation/alexsotoaguilera/smartbutton-mqtt-event-entities.yaml
   homeassistant:
     min_version: 2022.4.0
 
@@ -45,14 +45,14 @@ action:
       - conditions:
           - condition: template
             value_template: "{{ trigger.to_state.attributes.event_type == 'single' }}"
-        sequence: !input "actions_single"
+        sequence: !input actions_single
       - conditions:
           - condition: template
             value_template: "{{ trigger.to_state.attributes.event_type == 'double' }}"
-        sequence: !input "actions_double"
+        sequence: !input actions_double
       - conditions:
           - condition: template
             value_template: "{{ trigger.to_state.attributes.event_type == 'hold' }}"
-        sequence: !input "actions_hold"
+        sequence: !input actions_hold
 
 mode: single
