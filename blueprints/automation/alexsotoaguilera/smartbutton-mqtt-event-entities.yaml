@@ -9,39 +9,34 @@ blueprint:
   homeassistant:
     min_version: 2022.4.0
 
-input:
-  event_entity:
-    name: Smart Button Event Entity
-    description: >-
-      Select `event.button_name_action` (enable experimental_event_entities in Z2M).
-      Example: event.living_room_ts0041_action
-    selector:
-      entity:
-        domain: event
-        multiple: false
+  input:
+    event_entity:
+      name: Button Event Entity
+      description: >-
+        Select `event.button_name_action`
+      selector:
+        entity:
+          domain: event
+          multiple: false
 
-  actions_single:
-    name: Single Tap Actions
-    description: Actions to activate with SINGLE tap
-    selector:
-      action: {}
+    actions_single:
+      name: Single Tap Actions
+      selector:
+        action: {}
 
-  actions_double:
-    name: Double Tap Actions
-    description: Actions to activate with DOUBLE tap
-    selector:
-      action: {}
+    actions_double:
+      name: Double Tap Actions
+      selector:
+        action: {}
 
-  actions_hold:
-    name: Hold Tap Actions
-    description: Actions to activate with HOLD tap
-    selector:
-      action: {}
+    actions_hold:
+      name: Hold Tap Actions
+      selector:
+        action: {}
 
 trigger:
   - platform: state
     entity_id: !input event_entity
-    id: single_double_hold
 
 action:
   - choose:
