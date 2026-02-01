@@ -11,7 +11,7 @@ blueprint:
 
 input:
   event_entity:
-    name: Button Event Entity
+    name: Smart Button Event Entity
     description: >-
       Select `event.button_name_action` (enable experimental_event_entities in Z2M).
       Example: event.living_room_ts0041_action
@@ -19,24 +19,27 @@ input:
       entity:
         domain: event
         multiple: false
+
   actions_single:
     name: Single Tap Actions
     description: Actions to activate with SINGLE tap
     selector:
       action: {}
+
   actions_double:
     name: Double Tap Actions
     description: Actions to activate with DOUBLE tap
     selector:
       action: {}
+
   actions_hold:
     name: Hold Tap Actions
     description: Actions to activate with HOLD tap
     selector:
       action: {}
 
-triggers:
-  - trigger: state
+trigger:
+  - platform: state
     entity_id: !input event_entity
     id: single_double_hold
 
@@ -46,10 +49,12 @@ action:
           - condition: template
             value_template: "{{ trigger.to_state.attributes.event_type == 'single' }}"
         sequence: !input actions_single
+
       - conditions:
           - condition: template
             value_template: "{{ trigger.to_state.attributes.event_type == 'double' }}"
         sequence: !input actions_double
+
       - conditions:
           - condition: template
             value_template: "{{ trigger.to_state.attributes.event_type == 'hold' }}"
