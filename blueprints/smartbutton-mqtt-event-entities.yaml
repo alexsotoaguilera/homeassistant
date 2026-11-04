@@ -1,12 +1,11 @@
 blueprint:
   name: Smart Button (Event Entities)
   description: >-
-    Configure Smart Button with Event Entities with filter for Zigbee2MQTT restarts.
+    Configure Smart Button with Event Entities.
   domain: automation
   author: Alex Soto Aguilera
-  source_url: https://raw.githubusercontent.com/lynksthings/homeassistant/main/blueprints/smartbutton-mqtt-event-entities.yaml
   homeassistant:
-    min_version: 2022.8.0
+    min_version: 2024.8.0
 
   input:
     event_entity:
@@ -15,21 +14,25 @@ blueprint:
         Select `event.button_name_action`
       selector:
         entity:
-          domain: event
+          filter:
+            domain: event
           multiple: false
 
     actions_single:
       name: Single Tap Actions
+      default: []
       selector:
         action: {}
 
     actions_double:
       name: Double Tap Actions
+      default: []
       selector:
         action: {}
 
     actions_hold:
       name: Hold Tap Actions
+      default: []
       selector:
         action: {}
 
@@ -40,8 +43,14 @@ trigger:
 condition:
   - condition: template
     value_template: >-
-      {{ trigger.to_state is not none and
-         trigger.to_state.state not in ['unavailable', 'unknown'] }}
+      {{ trigger.from_state is not none and
+         trigger.to_state is not none and
+         trigger.from_state.state not in ['unavailable', 'unknown', 'none'] and
+         trigger.to_state.state not in ['unavailable', 'unknown', 'none'] and
+         trigger.from_state.state != trigger.to_state.state and
+         trigger.to_state.attributes.event_type is defined and
+         trigger.to_state.attributes.event_type not in [none, '', 'unknown'] and
+         (now() - trigger.to_state.last_updated).total_seconds() < 3 }}
 
 action:
   - choose:
